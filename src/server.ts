@@ -22,7 +22,7 @@ export async function startServer(app: Express, port: number): Promise<RunningSe
 
             server.close((err) => {
                 clearTimeout(timer);
-                err ? reject(err) : resolve;
+                err ? reject(err) : resolve();
             });
         });
         return closing;
