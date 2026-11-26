@@ -1,9 +1,9 @@
-import { SentMessageInfo, Transporter } from "nodemailer";
+import type { SentMessageInfo, Transporter } from "nodemailer";
 import { convert } from "html-to-text";
-import { createTransport } from "./client";
-import { emailFrom, emailFromName, emailOpts } from "./settings";
-import { SendEmailRequest } from "./dto";
-import { renderTemplate } from "./template";
+import { createTransport } from "./client.js";
+import { emailFrom, emailFromName, emailOpts } from "./settings.js";
+import type { SendEmailRequest } from "./dto.js";
+import { renderTemplate } from "./template.js";
 
 
 const transport: Transporter = createTransport(emailOpts);

@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { RunningServer, startServer } from "./server";
-import createApp from "./app";
+import { type RunningServer, startServer } from "./server.js";
+import createApp from "./app.js";
 
 const PORT = Number(process.env.PORT);
 const EXIT_CODE = { SIGINT: 130, SIGTERM: 143 } as const;
@@ -11,7 +11,7 @@ function installShutdown(running: RunningServer) {
             console.log(`${sig} received, shutting down`);
             void running.close( { forceAfterMs: 10_000 } )
             .then(() => { process.exitCode = EXIT_CODE[sig]; })
-            .catch((err) => {
+            .catch((err: unknown) => {
                 console.error("shutdown failed", err);
                 process.exit(1);
             });

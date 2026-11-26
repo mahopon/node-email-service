@@ -1,5 +1,5 @@
 import express, { type Express } from "express";
-import { EmailRouter } from "./controller";
+import { EmailRouter } from "./controller.js";
 
 function createApp(): Express {
     const app = express();

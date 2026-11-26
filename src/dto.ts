@@ -1,4 +1,4 @@
-import { Attachment } from "nodemailer";
+import type { Attachment } from "nodemailer";
 
 export type SendEmailRequest = {
     to: string;

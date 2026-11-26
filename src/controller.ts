@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { sendEmail } from "./service";
-import { SendEmailRequest } from "./dto";
+import { sendEmail } from "./service.js";
+import type { SendEmailRequest } from "./dto.js";
 
 
 export function EmailRouter(): Router {
