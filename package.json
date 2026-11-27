@@ -7,16 +7,21 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "pnpm dev:api",
-    "dev:api": "tsx watch src/cmd/api/main.ts",
-    "dev:queue": "tsx watch src/cmd/queue/main.ts",
+    "dev:api": "tsx watch --experimental-loader=@opentelemetry/instrumentation/hook.mjs src/cmd/api/main.ts",
+    "dev:queue": "tsx watch --experimental-loader=@opentelemetry/instrumentation/hook.mjs src/cmd/queue/main.ts",
     "build": "tsc",
-    "start:api": "node dist/cmd/api/main.js",
-    "start:queue": "node dist/cmd/queue/main.js"
+    "start:api": "node --experimental-loader=@opentelemetry/instrumentation/hook.mjs dist/cmd/api/main.js",
+    "start:queue": "node --experimental-loader=@opentelemetry/instrumentation/hook.mjs dist/cmd/queue/main.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@opentelemetry/api": "^1.10.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.83.1",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.301.2",
+    "@opentelemetry/instrumentation": "^0.301.2",
+    "@opentelemetry/sdk-node": "^0.301.2",
     "@types/node": "^26.6.10",
     "@types/nodemailer": "^8.0.2",
     "amqplib": "^2.4.2",
