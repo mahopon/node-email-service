@@ -1,3 +1,5 @@
+import { logger } from "./logger.js";
+
 export const EXIT_CODE = { SIGINT: 130, SIGTERM: 143 } as const;
 
 export interface Closable {
@@ -7,11 +9,11 @@ export interface Closable {
 export function installShutdown(closable: Closable): void {
     for (const sig of ["SIGINT", "SIGTERM"] as const) {
         process.once(sig, () => {
-            console.log(`${sig} received, shutting down`);
+            logger.info({ signal: sig }, "shutting down");
             void closable.close({ forceAfterMs: 10_000 })
                 .then(() => { process.exitCode = EXIT_CODE[sig]; })
                 .catch((err: unknown) => {
-                    console.error("shutdown failed", err);
+                    logger.error({ err }, "shutdown failed");
                     process.exit(1);
                 });
         });
