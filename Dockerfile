@@ -35,5 +35,9 @@ USER node
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+# The runtime is fixed; the command selects the entrypoint.
+# API:     docker run <image>
+# Worker:  docker run <image> dist/cmd/queue/main.js
+ENTRYPOINT ["node"]
+CMD ["dist/cmd/api/main.js"]
 
