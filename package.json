@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "dist/main.js",
+  "main": "dist/cmd/api/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/main.ts",
-    "build": "tsc"
+    "dev": "pnpm dev:api",
+    "dev:api": "tsx watch src/cmd/api/main.ts",
+    "dev:queue": "tsx watch src/cmd/queue/main.ts",
+    "build": "tsc",
+    "start:api": "node dist/cmd/api/main.js",
+    "start:queue": "node dist/cmd/queue/main.js"
   },
   "keywords": [],
   "author": "",
@@ -15,11 +19,13 @@
   "dependencies": {
     "@types/node": "^26.6.10",
     "@types/nodemailer": "^8.0.2",
+    "amqplib": "^2.4.2",
     "dotenv": "^18.0.10",
     "express": "^5.3.0",
     "html-to-text": "^10.0.1",
     "nodemailer": "^10.6.1",
-    "nunjucks": "^3.2.4"
+    "nunjucks": "^3.2.4",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
