@@ -1,19 +1,15 @@
 name: email
 
-x-queue-environment: &queue-environment
+x-app-environment: &app-environment
   NODE_ENV: development
   NODE_OPTIONS: "--experimental-loader=@opentelemetry/instrumentation/hook.mjs"
-  OTEL_SERVICE_NAME: email-worker
   OTEL_TRACES_EXPORTER: otlp
   OTEL_METRICS_EXPORTER: none
   OTEL_LOGS_EXPORTER: none
   OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
   OTEL_BSP_SCHEDULE_DELAY: 1000
-  RABBITMQ_URL: amqp://email:email@rabbitmq:5672
-  RABBITMQ_QUEUE: email
-  RABBITMQ_PREFETCH: 5
-  # Dev mail sink: every message sent by the worker lands in Mailpit.
+  # Dev mail sink: every message sent by the app lands in Mailpit.
   emailHost: mailpit
   emailPort: 1025
   emailSecure: "false"
@@ -21,6 +17,13 @@ x-queue-environment: &queue-environment
   emailPassword: dev
   emailFrom: no-reply@email.local
   emailFromName: Email Service
+
+x-queue-environment: &queue-environment
+  <<: *app-environment
+  OTEL_SERVICE_NAME: email-worker
+  RABBITMQ_URL: amqp://email:email@rabbitmq:5672
+  RABBITMQ_QUEUE: email
+  RABBITMQ_PREFETCH: 5
 
 services:
   rabbitmq:
@@ -76,6 +79,28 @@ services:
     depends_on:
       - jaeger
 
+  api:
+    build:
+      context: .
+      target: production
+    image: email-api:local
+    restart: unless-stopped
+    command: ["dist/cmd/api/main.js"]
+    ports:
+      - "3000:3000" # API: http://localhost:3000
+    volumes:
+      # Persist edits from /dev/templates back to the repo.
+      - ./templates:/app/templates
+    environment:
+      <<: *app-environment
+      OTEL_SERVICE_NAME: email-api
+      PORT: 3000
+    depends_on:
+      mailpit:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+
   queue:
     build:
       context: .
@@ -83,6 +108,9 @@ services:
     image: email-queue:local
     restart: unless-stopped
     command: ["dist/cmd/queue/main.js"]
+    volumes:
+      # Read edits made through the API without rebuilding the worker image.
+      - ./templates:/app/templates:ro
     environment:
       <<: *queue-environment
     depends_on:
