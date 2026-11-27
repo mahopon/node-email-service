@@ -1,18 +1,14 @@
 import "dotenv/config";
+import { startConsumer } from "../../queue/consumer.js";
+import { logger } from "../../shared/logger.js";
+import { installShutdown } from "../../shared/shutdown.js";
 
-// Queue worker entrypoint.
-//
-// TODO: start the queue consumer here and pass its close handle to
-// installShutdown(), e.g.:
-//
-//   import { installShutdown } from "../../shared/shutdown.js";
-//   const worker = await startWorker();
-//   installShutdown(worker);
 async function main() {
-    console.log("Queue worker entrypoint is ready; no consumer configured yet");
+    const consumer = await startConsumer();
+    installShutdown(consumer);
 }
 
 main().catch((err) => {
-    console.error(err);
+    logger.fatal({ err }, "queue worker failed");
     process.exit(1);
 });
