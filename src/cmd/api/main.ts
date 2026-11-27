@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { startServer } from "../../server.js";
+import { startServer } from "../../api/server.js";
 import createApp from "../../api/app.js";
 import { installShutdown } from "../../shared/shutdown.js";
 
