@@ -1,6 +1,7 @@
 import express, { type ErrorRequestHandler, type Express } from "express";
 import { pinoHttp } from "pino-http";
 import { EmailRouter } from "./controller.js";
+import { templatePreviewRouter } from "../dev/template-preview/routes.js";
 import { logger } from "../shared/logger.js";
 
 function createApp(): Express {
@@ -28,6 +29,11 @@ function createApp(): Express {
     });
     
     app.use("/email", EmailRouter());
+
+    // Local template editor/preview UI. Never exposed in production.
+    if (process.env.NODE_ENV !== "production") {
+        app.use("/dev/templates", templatePreviewRouter());
+    }
 
     const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
         req.log.error({ err }, "request failed");
