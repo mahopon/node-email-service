@@ -1,0 +1,64 @@
+name: email
+
+x-queue-environment: &queue-environment
+  NODE_ENV: development
+  RABBITMQ_URL: amqp://email:email@rabbitmq:5672
+  RABBITMQ_QUEUE: email
+  RABBITMQ_PREFETCH: 5
+  # Dev mail sink: every message sent by the worker lands in Mailpit.
+  emailHost: mailpit
+  emailPort: 1025
+  emailSecure: "false"
+  emailUser: dev
+  emailPassword: dev
+  emailFrom: no-reply@email.local
+  emailFromName: Email Service
+
+services:
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    restart: unless-stopped
+    environment:
+      # Dev-only credentials. The app connects with these same values.
+      RABBITMQ_DEFAULT_USER: email
+      RABBITMQ_DEFAULT_PASS: email
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # management UI
+    # Ephemeral broker state: keep it in RAM instead of using Docker's
+    # built-in anonymous volume for /var/lib/rabbitmq.
+    tmpfs:
+      - /var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 5000
+      # Accept any SMTP credentials so the app can authenticate over plain SMTP.
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # web UI: http://localhost:8025
+
+  queue:
+    build:
+      context: .
+      target: production
+    image: email-queue:local
+    restart: unless-stopped
+    command: ["dist/cmd/queue/main.js"]
+    environment:
+      <<: *queue-environment
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
